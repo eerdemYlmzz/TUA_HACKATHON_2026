@@ -1,2 +1,3 @@
 # TUA_HACKATHON_2026
- TUA  Astro Hackathon Adana Projemiz
+
+Our TUA Astro Hackathon Adana Project
