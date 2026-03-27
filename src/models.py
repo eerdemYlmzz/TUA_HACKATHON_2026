@@ -74,6 +74,7 @@ def create_autoencoder(in_channels=3, out_channels=3):
     output = layers.Conv2D(out_channels, 3, padding='same')(dec2)
     
     model = Model(inputs=input_layer, outputs=output, name='DenoisingAutoencoder')
+    
     return model
 
 

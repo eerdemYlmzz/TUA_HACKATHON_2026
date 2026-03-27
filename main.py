@@ -3,12 +3,9 @@ import numpy as np
 import yaml
 import cv2
 from pathlib import Path
-import sys
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
-
-from models import create_unet, create_autoencoder, print_model_info
-from utils import (
+from src.models import create_unet, create_autoencoder, print_model_info
+from src.utils import (
     save_model, load_model, CombinedLoss,
     plot_denoising_result, plot_training_history,
     calculate_psnr, calculate_ssim, clip_image,
