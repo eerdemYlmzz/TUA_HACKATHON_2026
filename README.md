@@ -89,19 +89,64 @@ Entry point with model initialization and training skeleton
 
 ---
 
+## 🌐 Web Interface (Streamlit)
+
+A user-friendly web interface is available to test the denoising model:
+
+### Running the Interface
+
+**Option 1: Using batch file (Windows)**
+```bash
+run_app.bat
+```
+
+**Option 2: Using PowerShell**
+```powershell
+.\run_app.ps1
+```
+
+**Option 3: Manual**
+```bash
+.\env\Scripts\activate.ps1
+streamlit run app.py
+```
+
+The interface will open at: `http://localhost:8501`
+
+### Features
+
+- 📤 **Upload Images**: Upload any satellite image for denoising
+- 📊 **Metrics Display**: View MSE, PSNR, and SSIM metrics
+- 🎨 **Before/After Comparison**: Side-by-side visualization
+- 📁 **Sample Results**: Browse training samples
+- 📈 **Training History**: View loss curves and model info
+
+---
+
 ## 🚀 Quick Start
 
-1. Install dependencies:
+### Step 1: Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Download EuroSAT dataset to `data/raw/`
-
-3. Once preprocessing and noises modules are ready:
+### Step 2: Train the Model
 ```bash
 python main.py
 ```
+
+### Step 3: Use the Web Interface
+```bash
+streamlit run app.py
+```
+
+Or simply run:
+```bash
+./run_app.bat          # Windows batch
+./run_app.ps1          # Windows PowerShell
+```
+
+The interface opens at: `http://localhost:8501`
 
 ---
 

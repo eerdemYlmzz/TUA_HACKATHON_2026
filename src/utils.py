@@ -132,16 +132,26 @@ def plot_denoising_result(noisy: np.ndarray, denoised: np.ndarray, original: np.
     plt.show()
 
 
-def plot_training_history(train_losses: List[float], val_losses: List[float] = None,
-                         save_path: str = None, figsize: Tuple[int, int] = (10, 6)) -> None:
+def plot_training_history(history, save_path: str = None, figsize: Tuple[int, int] = (10, 6)) -> None:
+    """Plot training history from Keras model fit() output."""
     
     fig, ax = plt.subplots(figsize=figsize)
     
-    epochs = range(1, len(train_losses) + 1)
-    ax.plot(epochs, train_losses, 'b-', label='Training Loss', linewidth=2, marker='o', markersize=4)
+    # Handle both History object and dict
+    if hasattr(history, 'history'):
+        hist_dict = history.history
+    else:
+        hist_dict = history
     
-    if val_losses is not None:
-        ax.plot(epochs, val_losses, 'r-', label='Validation Loss', linewidth=2, marker='s', markersize=4)
+    # Get loss values
+    if 'loss' in hist_dict:
+        epochs = range(1, len(hist_dict['loss']) + 1)
+        ax.plot(epochs, hist_dict['loss'], 'b-', label='Training Loss', linewidth=2, marker='o', markersize=4)
+    
+    # Get validation loss if available
+    if 'val_loss' in hist_dict:
+        epochs = range(1, len(hist_dict['val_loss']) + 1)
+        ax.plot(epochs, hist_dict['val_loss'], 'r-', label='Validation Loss', linewidth=2, marker='s', markersize=4)
     
     ax.set_xlabel('Epoch', fontsize=12, fontweight='bold')
     ax.set_ylabel('Loss', fontsize=12, fontweight='bold')

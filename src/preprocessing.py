@@ -3,7 +3,7 @@ import random
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from src.noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise
+from noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise
 
 def select_images(data_path, n_samples=500):
     classes = [d for d in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, d))]

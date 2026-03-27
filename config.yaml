@@ -1,10 +1,28 @@
 paths:
-  raw_data: "./data/raw"
+  raw_data: "./data/archive_8/EuroSAT"
   processed_data: "./data/processed"
   model_save: "./models/denoiser_v1.h5"
+  outputs: "./outputs"
+  logs: "./logs"
+  models: "./models"
 
-params:
+model:
+  architecture: "unet"  # "unet" or "autoencoder"
+  unet:
+    in_channels: 3
+    out_channels: 3
+    features: 64
+  autoencoder:
+    in_channels: 3
+    out_channels: 3
+
+training:
+  optimizer: "adam"  # "adam" or "sgd"
+  loss_function: "mse"  # "mse", "l1", or "combined"
+  learning_rate: 0.001
   batch_size: 32
   epochs: 50
-  learning_rate: 0.001
+
+params:
   noise_level: 0.1  # Gürültü şiddeti
+  noise_type: "salt_and_pepper"  # "salt_and_pepper", "speckle", "stripe", "poisson"
