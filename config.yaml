@@ -1,5 +1,5 @@
 paths:
-  raw_data: "./data/archive_8/EuroSAT"
+  raw_data: "./data/raw"
   processed_data: "./data/processed"
   model_save: "./models/denoiser_v1.h5"
   outputs: "./outputs"
