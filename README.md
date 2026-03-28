@@ -1,161 +1,113 @@
-# TUA Hackathon 2026 - Satellite Image Denoising
+# 🛰️ TUA Hackathon 2026 — Uydu Görüntüsü Gürültü Giderici (Denoiser)
 
-## 🛰️ Project Overview
-
-A deep learning project for denoising **Sentinel-2 satellite imagery** using a **U-Net encoder-decoder architecture**. This project is designed for the TUA Hackathon 2026 with a focus on cleaning corrupted satellite data that resulted from radiation damage or transmission errors during space operations.
-
-### 🎯 Mission Statement
-
-**"Uzaydan gelen veriler, atmosferik olaylar veya radyasyon nedeniyle bozulabiliyor. Biz, Sentinel-2 uydusundan gelen optik verileri, sanki en pahalı donanımsal filtrelerden geçmiş gibi yapay zeka ile temizleyerek veri kaybının önüne geçiyoruz."**
-
-*"Data coming from space can be corrupted by atmospheric events or radiation. We clean optical data from the Sentinel-2 satellite using artificial intelligence, as if it passed through the most expensive hardware filters, preventing data loss."*
+Bu proje, Sentinel-2 uydu görüntülerindeki radyasyon hasarı, atmosferik bozulmalar ve iletim hatalarını temizlemek amacıyla **U-Net mimarisi** kullanılarak geliştirilmiş bir derin öğrenme çözümüdür. TUA Hackathon 2026 kapsamında, uzaydan gelen optik verilerin kalitesini artırmak için tasarlanmıştır.
 
 ---
 
-## 📁 Project Structure
+## 🎯 Misyonumuz
 
-```
+> *"Uzaydan gelen veriler, atmosferik olaylar veya radyasyon nedeniyle bozulabiliyor. Biz, Sentinel-2 uydusundan gelen optik verileri, sanki en pahalı donanımsal filtrelerden geçmiş gibi yapay zeka ile temizleyerek veri kaybının önüne geçiyoruz."*
+
+---
+
+## 📁 Proje Yapısı
+```plaintext
 TUA_HACKATHON_2026/
-├── data/
-│   ├── raw/                    # Original clean EuroSAT images
-│   └── processed/              # Images with synthetic noise
-├── models/
-│   └── unet_denoiser.pt       # Trained model checkpoint
-├── notebooks/                  # Jupyter notebooks for exploration
-├── outputs/
-│   ├── logs/                   # Training logs
-│   ├── training_history.png    # Loss curves
-│   └── denoised_images/        # Output denoised images
 ├── src/
-│   ├── models.py              # U-Net and Autoencoder architectures ✅
-│   ├── noises.py              # Noise injection functions (to be created)
-│   ├── preprocessing.py       # Data loading and augmentation (to be created)
-│   └── utils.py               # Metrics, visualization, utilities ✅
-├── config.yaml                # Configuration file ✅
-├── main.py                    # Training entry point ✅
-├── requirements.txt           # Dependencies ✅
-├── .gitignore                 # Git ignore rules ✅
-└── README.md                  # This file
+│   ├── models.py          # U-Net (18M+ Parametre) ve Autoencoder mimarileri
+│   ├── noises.py          # Sentetik gürültü üretim fonksiyonları
+│   ├── preprocessing.py   # Veri yükleme, normalizasyon ve veri seti bölme
+│   └── utils.py           # PSNR, SSIM metrikleri ve görselleştirme araçları
+├── data/
+│   ├── raw/               # Orijinal temiz EuroSAT görüntüleri
+│   └── processed/         # İşlenmiş veriler
+├── models/
+│   └── denoiser_v1.h5     # Eğitilmiş TensorFlow model dosyası
+├── outputs/               # Kaydedilen test sonuçları ve eğitim grafikleri
+├── app.py                 # Streamlit web arayüzü
+├── main.py                # Eğitim ve test ana çalıştırma scripti
+├── config.yaml            # Model ve eğitim hiperparametreleri
+└── requirements.txt       # Gerekli kütüphaneler
 ```
 
 ---
 
-## 🔧 Core Components (COMPLETED)
+## 🛠️ Teknik Bileşenler
 
-### ✅ models.py - Neural Network Architectures
+### 1. Model Mimarisi (`models.py`)
 
-**U-Net Architecture** (Primary Model)
-- Encoder path: 4 layers of downsampling
-- Bottleneck: Compressed feature representation
-- Decoder path: 4 layers of upsampling with skip connections
-- Total parameters: ~1.9M
+- **U-Net:** 4 katmanlı derin encoder-decoder yapısı. Atlamalı bağlantılar (skip connections) sayesinde düşük seviyeli detaylar korunur. Yaklaşık **18 milyon** eğitilebilir parametreye sahiptir.
+- **Denoising Autoencoder:** Daha hızlı çıkarım (inference) için hafif bir alternatif model.
 
-**Denoising Autoencoder** (Lighter Alternative)
-- Simpler 3-layer encoder-decoder
-- Faster training/inference
+### 2. Gürültü Simülasyonu (`noises.py`)
 
-### ✅ utils.py - Complete Utilities
+Uzay operasyonlarında karşılaşılan gerçekçi hata türleri simüle edilmektedir:
 
-**Metrics**: PSNR, SSIM, MSE calculations
-**Visualization**: Training plots, batch results, before/after comparisons
-**Loss Functions**: MSELoss, L1Loss, CombinedLoss
-**Model I/O**: Save/load checkpoints
-**Tensor Utils**: NumPy-PyTorch conversions, normalization, clipping
+| Gürültü Türü | Açıklama |
+|---|---|
+| **Salt & Pepper** | İletim hataları |
+| **Speckle** | Koherent görüntüleme sistemleri paraziti |
+| **Stripe Noise** | Sensör hatalarından kaynaklanan çizgilenmeler |
+| **Poisson** | Düşük ışık / foton sayımı gürültüsü |
+| **Cosmic Ray** | Radyasyon kaynaklı parlak beyaz çizgiler |
 
-### ✅ config.yaml - Full Configuration
+### 3. Veri İşleme (`preprocessing.py`)
 
-Comprehensive settings for paths, noise parameters, training, evaluation, logging
-
-### ✅ main.py - Training Template
-
-Entry point with model initialization and training skeleton
+- Görüntüleri otomatik olarak **64×64** boyutuna getirir.
+- Eğitim sırasında verileri rastgele gürültü türleriyle (*random noise augmentation*) zenginleştirir.
+- Veri setini otomatik olarak **%70 Eğitim / %15 Doğrulama / %15 Test** olarak ayırır.
 
 ---
 
-## 🎓 To Be Implemented
+## 🌐 Web Arayüzü (Streamlit)
 
-### preprocessing.py (Your Friend - Team)
-- Image loading and augmentation
-- DataLoader creation
-- Data normalization
+Kullanıcı dostu arayüz sayesinde modelinizi kolayca test edebilirsiniz.
 
-### noises.py (Your Friend - Team)
-- Salt & pepper noise
-- Gaussian noise  
-- Speckle noise
-- Poisson noise
-- Stripe noise
-- Combined noise injection
-
----
-
-## 🌐 Web Interface (Streamlit)
-
-A user-friendly web interface is available to test the denoising model:
-
-### Running the Interface
-
-**Option 1: Using batch file (Windows)**
+**Çalıştırma:**
 ```bash
-run_app.bat
-```
-
-**Option 2: Using PowerShell**
-```powershell
-.\run_app.ps1
-```
-
-**Option 3: Manual**
-```bash
-.\env\Scripts\activate.ps1
 streamlit run app.py
 ```
 
-The interface will open at: `http://localhost:8501`
+**Özellikler:**
 
-### Features
-
-- 📤 **Upload Images**: Upload any satellite image for denoising
-- 📊 **Metrics Display**: View MSE, PSNR, and SSIM metrics
-- 🎨 **Before/After Comparison**: Side-by-side visualization
-- 📁 **Sample Results**: Browse training samples
-- 📈 **Training History**: View loss curves and model info
+- 📤 **Görsel Yükleme** — Kendi uydu görüntünüzü yükleyip temizleyebilirsiniz.
+- 🧪 **Gürültü Seçimi** — Farklı gürültü tiplerinde modelin performansını canlı görün.
+- 📊 **Metrik Takibi** — PSNR (dB), SSIM ve MSE değerlerini anlık hesaplar.
+- 📉 **Eğitim Geçmişi** — Modelin öğrenme eğrisini ve örnek sonuçları inceleyin.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Hızlı Başlangıç
 
-### Step 1: Install Dependencies
+### Adım 1 — Gereksinimleri Yükleyin
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 2: Train the Model
+### Adım 2 — Eğitimi Başlatın
+
+`config.yaml` dosyasından ayarlarınızı yapın ve modeli eğitin:
 ```bash
 python main.py
 ```
 
-### Step 3: Use the Web Interface
-```bash
-streamlit run app.py
-```
+### Adım 3 — Sonuçları İzleyin
 
-Or simply run:
-```bash
-./run_app.bat          # Windows batch
-./run_app.ps1          # Windows PowerShell
-```
-
-The interface opens at: `http://localhost:8501`
+Eğitim sonrası `outputs/` klasöründe oluşan `loss_chart.png` ve `test_result_x.png` dosyalarını inceleyerek modelin başarısını (PSNR/SSIM) kontrol edin.
 
 ---
 
-## 📊 Expected Performance
+## 📊 Beklenen Performans
 
-- PSNR: 25-35 dB
-- SSIM: 0.85-0.95
-- Training time: 30-60 min (GPU)
+| Parametre | Değer |
+|---|---|
+| **Giriş Boyutu** | 64×64×3 (RGB) |
+| **Hedef PSNR** | 25 – 35 dB |
+| **Hedef SSIM** | 0.85 – 0.95 |
+| **Platform** | TensorFlow 2.x |
 
 ---
 
-## Our TUA Astro Hackathon Adana Project
+<div align="center">
+  🚀 <strong>TUA Astro Hackathon — Adana Projesi</strong> 🚀
+</div>
