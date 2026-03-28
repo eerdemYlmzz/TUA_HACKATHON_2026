@@ -84,8 +84,8 @@ def process_image(model, image_input, noise_type="salt_and_pepper"):
         # Resize
         original_shape = image_input.shape[:2]
         
-        # Denoise
-        denoised_64 = model.predict(np.expand_dims(image_64, 0), verbose=0)[0]
+        # Denoise noisy input (not the clean image)
+        denoised_64 = model.predict(np.expand_dims(noisy_image, 0), verbose=0)[0]
         denoised_64 = clip_image(denoised_64)
         
         # Resize back
@@ -94,17 +94,25 @@ def process_image(model, image_input, noise_type="salt_and_pepper"):
         # Metrics
         noisy_mse = calculate_mse(image_64, noisy_image)
         denoised_mse = calculate_mse(image_64, denoised_64)
-        psnr = calculate_psnr(image_64, noisy_image)
-        ssim = calculate_ssim(image_64, noisy_image)
+        noisy_psnr = calculate_psnr(image_64, noisy_image)
+        denoised_psnr = calculate_psnr(image_64, denoised_64)
+        noisy_ssim = calculate_ssim(image_64, noisy_image)
+        denoised_ssim = calculate_ssim(image_64, denoised_64)
+
+        # Keep the same display size as original for easier visual comparison
+        noisy = cv2.resize(noisy_image, (original_shape[1], original_shape[0]))
         
         return {
             'original': image_input,
-            'noisy': noisy_image,
+            'noisy': noisy,
             'denoised': denoised,
             'metrics': {
+                'noisy_mse': noisy_mse,
                 'mse': denoised_mse,
-                'psnr': psnr,
-                'ssim': ssim,
+                'noisy_psnr': noisy_psnr,
+                'psnr': denoised_psnr,
+                'noisy_ssim': noisy_ssim,
+                'ssim': denoised_ssim,
             }
         }
     except Exception as e:
@@ -151,13 +159,47 @@ if model is not None:
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
-                    st.metric("MSE", f"{metrics['mse']:.4f}")
+                    st.metric(
+                        "MSE (Denoised)",
+                        f"{metrics['mse']:.4f}",
+                        delta=f"{(metrics['noisy_mse'] - metrics['mse']):.4f}"
+                    )
                 
                 with col2:
-                    st.metric("PSNR", f"{metrics['psnr']:.2f} dB")
+                    st.metric(
+                        "PSNR (Denoised)",
+                        f"{metrics['psnr']:.2f} dB",
+                        delta=f"{(metrics['psnr'] - metrics['noisy_psnr']):.2f} dB"
+                    )
                 
                 with col3:
-                    st.metric("SSIM", f"{metrics['ssim']:.4f}")
+                    st.metric(
+                        "SSIM (Denoised)",
+                        f"{metrics['ssim']:.4f}",
+                        delta=f"{(metrics['ssim'] - metrics['noisy_ssim']):.4f}"
+                    )
+
+                st.markdown("#### Noisy vs Denoised Comparison")
+                st.table([
+                    {
+                        "Metric": "MSE (lower is better)",
+                        "Noisy": f"{metrics['noisy_mse']:.4f}",
+                        "Denoised": f"{metrics['mse']:.4f}",
+                        "Improvement": f"{(metrics['noisy_mse'] - metrics['mse']):.4f}"
+                    },
+                    {
+                        "Metric": "PSNR dB (higher is better)",
+                        "Noisy": f"{metrics['noisy_psnr']:.2f}",
+                        "Denoised": f"{metrics['psnr']:.2f}",
+                        "Improvement": f"+{(metrics['psnr'] - metrics['noisy_psnr']):.2f}"
+                    },
+                    {
+                        "Metric": "SSIM (higher is better)",
+                        "Noisy": f"{metrics['noisy_ssim']:.4f}",
+                        "Denoised": f"{metrics['ssim']:.4f}",
+                        "Improvement": f"+{(metrics['ssim'] - metrics['noisy_ssim']):.4f}"
+                    }
+                ])
     
     with tab2:
         st.subheader("Sample Results")
