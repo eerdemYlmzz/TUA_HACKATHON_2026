@@ -2,7 +2,7 @@ import os
 import random
 import cv2
 import numpy as np
-from src.noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise
+from src.noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise, cosmic_ray
 
 def select_images(data_path, n_samples=500):
     classes = [d for d in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, d))]
@@ -60,6 +60,9 @@ def load_and_add_noise(image_path, noise_type="random"):
             pk = random.uniform(5.0, 20.0)
             noisy_img = poisson_noise(noisy_img, peak=pk)
             
+        if random.random() < 0.3:
+            noisy_img = cosmic_ray(noisy_img)
+            
         return img, noisy_img
 
     # 3. Belirli bir gürültü tipi istendiyse eski mantık devam eder
@@ -67,7 +70,8 @@ def load_and_add_noise(image_path, noise_type="random"):
         "salt_and_pepper": salt_and_pepper,
         "speckle": speckle_noise,
         "stripe": stripe_noise,
-        "poisson": poisson_noise
+        "poisson": poisson_noise,
+        "cosmic_ray": cosmic_ray
     }
     
     noise_method = noise_map.get(noise_type, salt_and_pepper)

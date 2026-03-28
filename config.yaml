@@ -24,4 +24,4 @@ training:
 
 params:
   noise_level: 0.1  # Gürültü şiddeti
-  noise_type: "salt_and_pepper"  # "salt_and_pepper", "speckle", "stripe", "poisson"
+  noise_type: "random"  # "salt_and_pepper", "speckle", "stripe", "poisson"

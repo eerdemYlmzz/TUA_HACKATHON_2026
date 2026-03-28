@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 def salt_and_pepper(image, amount=0.05):
     # p=[tuz, biber, orijinal]
@@ -34,3 +35,10 @@ def poisson_noise(image, peak=10.0): # peak parametresi eklendi
     noisy = np.random.poisson(scaled_image)
     noisy_img = noisy / peak
     return np.clip(noisy_img, 0, 1)
+
+def cosmic_ray(image):
+    x1, y1 = np.random.randint(0, 64, 2)
+    x2, y2 = x1 + np.random.randint(-5, 5), y1 + np.random.randint(-5, 5)
+    cv2.line(image, (x1, y1), (x2, y2), (1.0, 1.0, 1.0), 1) # Parlak beyaz çizgi
+
+    return image
