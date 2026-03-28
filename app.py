@@ -35,15 +35,16 @@ with st.sidebar:
 @st.cache_resource
 def load_model():
     """Load trained model"""
-    model_path = "./models/denoiser_v1.h5"
+    model_path = Path(__file__).parent / "models" / "denoiser_v1.h5"
     
     if not Path(model_path).exists():
         return None
     
     try:
-        model = tf.keras.models.load_model(model_path)
+        model = tf.keras.models.load_model(model_path, compile=False)
         return model
-    except:
+    except Exception as e:
+        st.error(f"Hata: {type(e).__name__}: {e}")
         return None
 
 def add_noise_to_image(image, noise_type="salt_and_pepper"):
@@ -74,13 +75,14 @@ def process_image(model, image_input, noise_type="salt_and_pepper"):
             image_input = np.stack([image_input] * 3, axis=-1)
         elif image_input.shape[2] == 4:
             image_input = image_input[:, :, :3]
-        
+
+        image_64 = cv2.resize(image_input, (64, 64))
+
         # Add noise
-        noisy_image = add_noise_to_image(image_input, noise_type)
+        noisy_image = add_noise_to_image(image_64, noise_type)
         
         # Resize
         original_shape = image_input.shape[:2]
-        image_64 = cv2.resize(noisy_image, (64, 64))
         
         # Denoise
         denoised_64 = model.predict(np.expand_dims(image_64, 0), verbose=0)[0]
@@ -90,11 +92,10 @@ def process_image(model, image_input, noise_type="salt_and_pepper"):
         denoised = cv2.resize(denoised_64, (original_shape[1], original_shape[0]))
         
         # Metrics
-        mse = calculate_mse(image_64, image_64)
-        noisy_mse = calculate_mse(image_64, image_64)
+        noisy_mse = calculate_mse(image_64, noisy_image)
         denoised_mse = calculate_mse(image_64, denoised_64)
-        psnr = calculate_psnr(image_64, denoised_64)
-        ssim = calculate_ssim(image_64, denoised_64)
+        psnr = calculate_psnr(image_64, noisy_image)
+        ssim = calculate_ssim(image_64, noisy_image)
         
         return {
             'original': image_input,
