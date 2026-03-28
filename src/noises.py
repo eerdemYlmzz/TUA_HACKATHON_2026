@@ -12,15 +12,10 @@ def salt_and_pepper(image, amount=0.05):
 
     return np.clip(noisy_img, 0, 1)
 
-def speckle_noise(image):    
-    # Rastgele gürültü üret (mean=0, sigma=0.1)
+def speckle_noise(image, sigma=0.1): # sigma parametresi eklendi
     row, col, ch = image.shape
-    gauss = np.random.normal(0, 0.1, (row, col, ch))
-    
-    # Çarpımsal uygulama: noisy = image + image * noise
+    gauss = np.random.normal(0, sigma, (row, col, ch)) # 0.1 yerine sigma kullanıldı
     noisy_img = image + image * gauss
-    
-    # Sınırla ve Geri Dönüştür (Opsiyonel - Eğer hemen eğitme girmeyecekse)
     return np.clip(noisy_img, 0, 1)
 
 def stripe_noise(image, sigma=0.1):
@@ -34,13 +29,8 @@ def stripe_noise(image, sigma=0.1):
 
     return np.clip(noisy_img, 0, 1)
 
-def poisson_noise(image):
-    peak = 10.0
-
-    scaled_image = image * peak
-
+def poisson_noise(image, peak=10.0): # peak parametresi eklendi
+    scaled_image = image * peak # 10.0 yerine peak kullanıldı
     noisy = np.random.poisson(scaled_image)
-
     noisy_img = noisy / peak
-
     return np.clip(noisy_img, 0, 1)

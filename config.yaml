@@ -3,7 +3,6 @@ paths:
   processed_data: "./data/processed"
   model_save: "./models/denoiser_v1.h5"
   outputs: "./outputs"
-  logs: "./logs"
   models: "./models"
 
 model:

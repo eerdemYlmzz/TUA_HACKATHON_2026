@@ -2,16 +2,13 @@ import streamlit as st
 import numpy as np
 import cv2
 from pathlib import Path
-import sys
 import tensorflow as tf
 from PIL import Image
 import warnings
 warnings.filterwarnings('ignore')
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
-
-from models import create_unet
-from utils import normalize_image, clip_image, calculate_psnr, calculate_ssim, calculate_mse
+from src.models import create_unet
+from src.utils import normalize_image, clip_image, calculate_psnr, calculate_ssim, calculate_mse
 
 # Page config
 st.set_page_config(
@@ -52,7 +49,7 @@ def load_model():
 def add_noise_to_image(image, noise_type="salt_and_pepper"):
     """Add noise to image"""
     try:
-        from noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise
+        from src.noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise
         
         funcs = {
             "salt_and_pepper": salt_and_pepper,

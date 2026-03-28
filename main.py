@@ -65,7 +65,7 @@ def setup_training(config: dict, model):
     elif training_config['loss_function'] == "l1":
         loss_fn = tf.keras.losses.MeanAbsoluteError()
     elif training_config['loss_function'] == "combined":
-        from utils import CombinedLoss
+        from src.utils import CombinedLoss
         loss_fn = CombinedLoss(weight_l1=0.5, weight_mse=0.5)
     else:
         raise ValueError(f"Unknown loss function: {training_config['loss_function']}")
@@ -92,7 +92,6 @@ def main():
     
     # Create output directories
     Path(config['paths']['outputs']).mkdir(parents=True, exist_ok=True)
-    Path(config['paths']['logs']).mkdir(parents=True, exist_ok=True)
     Path(config['paths']['models']).mkdir(parents=True, exist_ok=True)
     
     print("\nSetup complete! Model is ready for training.")
@@ -103,7 +102,7 @@ def main():
     print("="*60)
     
     try:
-        from preprocessing import select_images, load_and_add_noise
+        from src.preprocessing import select_images, load_and_add_noise
         
         raw_data_path = config['paths']['raw_data']
         
