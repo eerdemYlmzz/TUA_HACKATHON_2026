@@ -3,6 +3,7 @@ import random
 import cv2
 import numpy as np
 from src.noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise, cosmic_ray
+from sklearn.model_selection import train_test_split
 
 def select_images(data_path, n_samples=500):
     classes = [d for d in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, d))]
@@ -81,3 +82,17 @@ def load_and_add_noise(image_path, noise_type="random"):
 
 def normalize_image(image):
     return image.astype(np.float32) / 255.0
+
+def get_train_val_test_paths(all_image_paths, train_size=0.7, val_size=0.15, test_size=0.15):
+    # Önce Train ve Geriye Kalanlar (Val + Test) olarak ayır
+    train_paths, remaining_paths = train_test_split(
+        all_image_paths, train_size=train_size, random_state=42, shuffle=True
+    )
+    
+    # Kalanları da Kendi İçinde Val ve Test olarak ikiye böl
+    # (0.15 / 0.30 = 0.5 olduğu için test_size=0.5 diyoruz)
+    val_paths, test_paths = train_test_split(
+        remaining_paths, test_size=0.5, random_state=42, shuffle=True
+    )
+    
+    return train_paths, val_paths, test_paths
