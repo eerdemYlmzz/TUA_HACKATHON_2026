@@ -27,7 +27,7 @@ with st.sidebar:
     st.header("Settings")
     noise_type = st.selectbox(
         "Noise Type:",
-        ["salt_and_pepper", "speckle", "stripe", "poisson"]
+        ["salt_and_pepper", "speckle", "stripe", "poisson", "cosmic_ray", "random"]
     )
     st.markdown("---")
     st.info("Model: U-Net\n\nParameters: 18M+\n\nInput: 64×64×3")
@@ -50,16 +50,18 @@ def load_model():
 def add_noise_to_image(image, noise_type="salt_and_pepper"):
     """Add noise to image"""
     try:
-        from src.noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise
+        from src.noises import salt_and_pepper, speckle_noise, stripe_noise, poisson_noise, cosmic_ray, random_noise
         
         funcs = {
             "salt_and_pepper": salt_and_pepper,
             "speckle": speckle_noise,
             "stripe": stripe_noise,
-            "poisson": poisson_noise
+            "poisson": poisson_noise,
+            "cosmic_ray": cosmic_ray,
+            "random": random_noise
         }
         
-        return funcs[noise_type](image)
+        return funcs.get(noise_type, salt_and_pepper)(image)
     except:
         return image
 
